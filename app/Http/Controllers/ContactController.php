@@ -3,25 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Auth;
+use DB;
+use Validator;
+
 
 class ContactController extends Controller
 {
     public function addTask(request $request){
-        $user_id = Auth::User()->user_id;
+        $user_id = 1;//Auth::User()->user_id;
 
-        $now = Carbon::now();
+    
         $validator=validator::make($request->all(),[
 
-            'task_name' => 'required',
-            'project_id' => 'required',
-            // 'planned_hours' => 'required',
-            // 'planned_minutes' => 'required',
-            'total_planned_minutes' => 'required',
-            'start_date' => 'required',
-
-            // 'description' => 'required',
-            'status' => 'required',
-            'task_manager_id' => 'required',
+           
+            'name' => 'required',
+            'email' => 'required',
+            'message' => 'required',
 
             
 
@@ -31,32 +29,19 @@ class ContactController extends Controller
             }
 
 
-            $task_name   = $request->input('task_name');
-            $description   = $request->input('description');
-            // $city_name   = $request->input('city_name');
-            $project_id   = $request->input('product_id');
-            $planned_minutes   = $request->input('total_planned_minutes');
-            $task_manager_id   = $request->input('task_manager_id');
-            $start_date   = $request->input('start_date');
-            $end_date   = $request->input('end_date');
-            $status   = $request->input('status');
+            $name   = $request->input('name');
+            $email   = $request->input('email');
+            $message   = $request->input('message');
+            $status   = 1;//$request->input('message');
+       
 
-
-            $res = DB::table ('tasks')
+            $res = DB::table ('test_task')
             ->insert([
-                //  'task_code' => $task_code,
-                'task_name' => $task_name,
-                'description' => $description,
-                'product_id' => $project_id,
-                'planned_minutes' => $planned_minutes,
-                'task_manager_id' => $task_manager_id,
-                'end_date' => $end_date,
-                'start_date' => $start_date,
+                 'message' => $message,
+                'name' => $name,
+                'email' => $email,
                 'status' => $status,
-                'created_by'=>$user_id,
-                'created_at'=>$now,
-                'updated_by'=>$user_id,
-                'updated_at'=>$now,
+                
             ]);
             if($res){
                 return response()->json(['message'=>'Task successfully added','success'=>true],200);

@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Middleware;
-
+use Config;
 use Closure;
+use DB;
 
 class TenancyBeta
 {
@@ -15,21 +16,22 @@ class TenancyBeta
      */
     public function handle($request, Closure $next)
     {
-             // echo"hello testing now";
-     //   Check if its first time visit enable shared session
-    
-        // Get the subdomain and modify the database on the fly
-        $route = $request->route();
-        $subdomain = $route->parameter('subdomain');
-        // Check if session has config already exist
-        if ($request->session()->has($subdomain)) {
-            $tenant = $request->session()->get($subdomain);
-        } else {
-            // Retrieve requested tenant's info from database. If not found, abort the request.
-            $tenant = Tenant::where('slug', $subdomain)->firstOrFail();
-        }
+        //get url  as sub_domain
+        $url = \URL::current();
+        $host_name = $_SERVER['HTTP_HOST'];
+        $url .= " HOST: " . $host_name;
+
+        //get db name 
+        
+        $tenant = DB::table('tenants as t')
+        ->where('t.slug',$url)
+        ->select('t.slug','t.db_name')
+        ->first();
+         $subdomain = $tenant->slug;
+         $dbname = $tenant->db_name;
+      
         // Connect to the tenant database
-        Config::set('database.connections.mysql.database', 'mts_'.$subdomain);
+        Config::set('database.connections.mysql.database', 'mts_'.$dbname);
         Config::set('database.default', 'mysql');
         DB::reconnect('mysql');
         // Store the credentials into the session
